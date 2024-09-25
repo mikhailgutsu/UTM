@@ -2,53 +2,76 @@ package UTM.PCD.lab2;
 
 public class Main {
     public static void main(String[] args) {
-        ThreadGroup sys = Thread.currentThread().getThreadGroup();
-        sys.list();
+
+        ThreadGroup mainGroup = new ThreadGroup("Main");
+
+        ThreadGroup g1 = new ThreadGroup(mainGroup, "G1");
+
+        ThreadGroup g3 = new ThreadGroup(g1, "G3");
         
-        sys.setMaxPriority(Thread.MAX_PRIORITY - 1);
-        Thread curr = Thread.currentThread();
-        curr.setPriority(curr.getPriority() + 1);
-        sys.list();
-
-        ThreadGroup g1 = new ThreadGroup("g1");
-        g1.setMaxPriority(Thread.MAX_PRIORITY);
-        Thread t = new Thread(g1, "A");
-        t.setPriority(Thread.MAX_PRIORITY);
-        g1.list();
-
-        g1.setMaxPriority(Thread.MAX_PRIORITY - 2);
-        g1.setMaxPriority(Thread.MAX_PRIORITY);
-        g1.list();
-
-        t = new Thread(g1, "B");
-        t.setPriority(Thread.MAX_PRIORITY);
-        g1.list();
-
-        g1.setMaxPriority(Thread.MIN_PRIORITY + 2);
-        t = new Thread(g1, "C");
-        g1.list();
+        Thread thf = new Thread(g3, "Thf");
+        thf.setPriority(3);
+        Thread thb = new Thread(g3, "Thb");
+        thb.setPriority(7);
+        Thread thc = new Thread(g3, "Thc");
+        thc.setPriority(3);
+        Thread thd = new Thread(g3, "Thd");
+        thd.setPriority(3);
         
-        t.setPriority(t.getPriority() - 1);
-        g1.list();
+        Thread thA = new Thread(g1, "ThA");
+        thA.setPriority(3);
 
-        ThreadGroup g2 = new ThreadGroup(g1, "g2");
-        g2.list(); // (8)
-        g2.setMaxPriority(Thread.MAX_PRIORITY);
-        g2.list(); // (9)
+        ThreadGroup g2 = new ThreadGroup(mainGroup, "G2");
+        Thread th8 = new Thread(g2, "Th8");
+        th8.setPriority(3);
+        Thread th9 = new Thread(g2, "Th9");
+        th9.setPriority(4);
+        Thread th3 = new Thread(g2, "Th3");
+        th3.setPriority(3);
 
-        for (int i = 0; i < 5; i++) {
-            new Thread(g2, Integer.toString(i));
+        Thread th1 = new Thread(mainGroup, "Th1");
+        th1.setPriority(3);
+        Thread th2 = new Thread(mainGroup, "Th2");
+        th2.setPriority(3);
+
+        displayThreadInfo(mainGroup);
+
+        startAllThreads(mainGroup);
+    }
+
+    private static void displayThreadInfo(ThreadGroup group) {
+
+        Thread[] threads = new Thread[group.activeCount()];
+        group.enumerate(threads);
+        
+        for (Thread thread : threads) {
+            if (thread != null) {
+                System.out.println("Thread Name: " + thread.getName() + 
+                                   ", Group Name: " + thread.getThreadGroup().getName() + 
+                                   ", Priority: " + thread.getPriority() + " (" + thread.getPriority() + ")");
+            }
         }
-        
-        sys.list(); // (10)
-        System.out.println("Starting all threads:");
 
-        Thread[] all = new Thread[sys.activeCount()];
-        sys.enumerate(all);
-        for (int i = 0; i < all.length; i++) {
-            if (!all[i].isAlive()) {
-                all[i].start();
+        ThreadGroup[] subGroups = new ThreadGroup[group.activeGroupCount()];
+        group.enumerate(subGroups, true);
+        
+        for (ThreadGroup subGroup : subGroups) {
+            if (subGroup != null) {
+                System.out.println("Subgroup Name: " + subGroup.getName());
+                displayThreadInfo(subGroup);
             }
         }
     }
-} // End of ThreadGroup1
+
+    private static void startAllThreads(ThreadGroup group) {
+
+        Thread[] threads = new Thread[group.activeCount()];
+        group.enumerate(threads);
+        
+        for (Thread thread : threads) {
+            if (thread != null && !thread.isAlive()) {
+                thread.start();
+            }
+        }
+    }
+}
