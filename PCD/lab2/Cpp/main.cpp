@@ -2,7 +2,7 @@
 #include <thread>
 #include <vector>
 #include <string>
-#include <mutex>
+#include "windows.h"
 
 class ThreadGroup {
 public:
@@ -21,66 +21,81 @@ public:
         }
     }
 
-    void addThread(std::thread&& t) {
+    void addThread(std::thread&& t, int priority) {
         threads.push_back(std::move(t));
+        priorities.push_back(priority);
     }
 
     void startAllThreads() {
         for (auto& t : threads) {
             if (t.joinable()) {
-                t.join(); 
+                t.join();  
             }
         }
+    }
+
+    void showPriorities() const {
+        std::cout << "Group: " << groupName << " Priorities: ";
+        for (int p : priorities) {
+            std::cout << p << " ";
+        }
+        std::cout << std::endl;
     }
 
 private:
     std::string groupName;
     int maxPriority;
     std::vector<std::thread> threads;
+    std::vector<int> priorities; 
 };
 
-void threadTask(const std::string& name) {
-    std::cout << "Thread " << name << " is running." << std::endl;
+void threadTask(const std::string& name, int priority) {
+    std::cout << "Thread " << name << " with priority " << priority << " is running." << std::endl;
 }
 
 int main() {
-    ThreadGroup sys("sys");
-    sys.list();
-    sys.setMaxPriority(9);
-    sys.list();
 
-    ThreadGroup g1("g1");
-    g1.setMaxPriority(10);
+    ThreadGroup sys("Main");
 
-    g1.addThread(std::thread(threadTask, "A"));
+    ThreadGroup g1("G1");
+
+    ThreadGroup g3("G3");
+
+    g3.addThread(std::thread(threadTask, "Thf", 3), 3);
+    g3.addThread(std::thread(threadTask, "Thb", 7), 7);
+    g3.addThread(std::thread(threadTask, "Thc", 3), 3);
+    g3.addThread(std::thread(threadTask, "Thd", 3), 3);
+
+    g3.showPriorities();
+    g3.list();
+
+    g1.addThread(std::thread(threadTask, "ThA", 3), 3);
     g1.list();
 
-    g1.setMaxPriority(8);
-    g1.setMaxPriority(10);
     g1.list();
+    g1.showPriorities();
 
-    g1.addThread(std::thread(threadTask, "B"));
-    g1.list();
+    ThreadGroup g2("G2");
 
-    g1.setMaxPriority(3);
-    g1.addThread(std::thread(threadTask, "C"));
-    g1.list();
-
-    ThreadGroup g2("g2");
+    g2.addThread(std::thread(threadTask, "Th8", 3), 3);
+    g2.addThread(std::thread(threadTask, "Th9", 4), 4);
+    g2.addThread(std::thread(threadTask, "Th3", 3), 3);
     g2.list();
-    g2.setMaxPriority(10);
-    g2.list();
 
-    for (int i = 0; i < 5; ++i) {
-        g2.addThread(std::thread(threadTask, std::to_string(i)));
-    }
+    sys.addThread(std::thread(threadTask, "Th1", 3), 3);
+    sys.addThread(std::thread(threadTask, "Th2", 3), 3);
 
     sys.list();
+    sys.showPriorities();
+
     std::cout << "Starting all threads:" << std::endl;
 
     sys.startAllThreads();
     g1.startAllThreads();
     g2.startAllThreads();
+    g3.startAllThreads();
+
+    system("pause");
 
     return 0;
 }
