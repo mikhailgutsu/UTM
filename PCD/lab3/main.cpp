@@ -1,106 +1,93 @@
 #include <iostream>
 #include <thread>
-#include <vector>
-#include <cstdlib>
 #include <chrono>
+#include <vector>
 
 using namespace std;
 
-const int SIZE = 100;
-int counter = 0;
-vector<int> b(SIZE);
-vector<int> a;
+// Функция для вывода текста с задержкой в 100 мс между символами
+void printWithDelay(const string& text) {
+    for (char c : text) {
+        cout << c;
+        this_thread::sleep_for(chrono::milliseconds(100));
+    }
+    cout << endl;
+}
 
-int pairone = 0;
-int pairtwo = 0;
-
-void straightThread() {
-    int result = 0;
+// Первый поток: вычисление суммы произведений чисел на нечётных позициях по два элемента
+void thread1() {
     cout << "Starting Thread 1" << endl;
-    for (int i = 0; i < counter; i += 4) {
-        this_thread::sleep_for(chrono::milliseconds(100));
-
-        if ((i + 4) >= counter) {
-            continue;
-        } else {
-            pairone = a[i] + a[i + 1];
-            pairtwo = a[i + 2] + a[i + 3];
-            result = pairone + pairtwo;
-            cout << "Current value for Thread 1 is: " << pairone << " + " << pairtwo << " = " << result << endl;
+    printWithDelay("Conditia 1 din tabelul 3");
+    
+    int sum = 0;
+    for (int i = 19; i <= 119; i += 2) {  // Диапазон [19, 119]
+        if (i + 1 <= 119) {
+            sum += i * (i + 1);
         }
     }
-    cout << "1: Name" << endl;
+    
+    cout << "Suma produselor numerelor pe pozitii impare (inceput): " << sum << endl;
+    this_thread::sleep_for(chrono::milliseconds(1000));
+    printWithDelay("Prenumele studentului");
 }
 
-void reverseThread() {
-    int result = 0;
+// Второй поток: вычисление суммы произведений чисел на нечётных позициях по два элемента с конца диапазона
+void thread2() {
     cout << "Starting Thread 2" << endl;
-    for (int i = counter - 1; i >= 0; i -= 4) {
-        this_thread::sleep_for(chrono::milliseconds(100));
+    printWithDelay("Conditia 2 din tabelul 3");
 
-        if ((i - 4) <= 0) {
-            continue;
-        } else {
-            pairone = a[i] + a[i - 1];
-            pairtwo = a[i - 2] + a[i - 3];
-            result = pairone + pairtwo;
-            cout << "Current value for Thread 2 is: " << pairone << " + " << pairtwo << " = " << result << endl;
+    int sum = 0;
+    for (int i = 106; i >= 6; i -= 2) {  // Диапазон [6, 106]
+        if (i - 1 >= 6) {
+            sum += i * (i - 1);
         }
     }
-    cout << "2: Surname" << endl;
+
+    cout << "Suma produselor numerelor pe pozitii impare (sfarsit): " << sum << endl;
+    this_thread::sleep_for(chrono::milliseconds(1000));
+    printWithDelay("Numele studentului");
 }
 
-void straightIntervalThread() {
-    cout << "Starting Thread 4" << endl;
-    for (int i = 200; i <= 300; ++i) {
-        cout << i << " ";
-    }
-    cout << endl;
-    cout << "4: Group" << endl;
-}
-
-void reverseIntervalThread() {
+// Третий поток: проход по диапазону от начала интервала [654, 1278]
+void thread3() {
     cout << "Starting Thread 3" << endl;
-    for (int i = 1000; i <= 1100; ++i) {
+    printWithDelay("Conditia 3 din tabelul 3");
+
+    for (int i = 654; i <= 1278; i++) {
         cout << i << " ";
     }
     cout << endl;
-    cout << "3: P C D" << endl;
+
+    this_thread::sleep_for(chrono::milliseconds(1000));
+    printWithDelay("Denumirea disciplinei");
+}
+
+// Четвертый поток: проход по диапазону от конца интервала [123, 908]
+void thread4() {
+    cout << "Starting Thread 4" << endl;
+    printWithDelay("Conditia 4 din tabelul 3");
+
+    for (int i = 908; i >= 123; i--) {
+        cout << i << " ";
+    }
+    cout << endl;
+
+    this_thread::sleep_for(chrono::milliseconds(1000));
+    printWithDelay("Grupa");
 }
 
 int main() {
-    cout << "Printing Array: " << endl;
-    for (int i = 0; i < SIZE; ++i) {
-        b[i] = rand() % 100 + 16; // Random values between 16 and 115
-        cout << b[i] << " ";
-        if (i == 50) {
-            cout << b[i] << " ";
-        }
-        if (i == 99) {
-            cout << endl;
-        }
-        if (b[i] % 2 == 0) {
-            ++counter;
-        }
-    }
+    // Запуск четырёх потоков
+    thread t1(thread1);
+    thread t2(thread2);
+    thread t3(thread3);
+    thread t4(thread4);
 
-    a.resize(counter);
-    int k = 0;
-    for (int i = 0; i < SIZE; ++i) {
-        if (b[i] % 2 == 0) {
-            a[k++] = b[i];
-        }
-    }
-
-    thread first(straightThread);
-    thread second(reverseThread);
-    thread third(reverseIntervalThread);
-    thread fourth(straightIntervalThread);
-
-    first.join();
-    second.join();
-    third.join();
-    fourth.join();
+    // Ожидание завершения всех потоков
+    t1.join();
+    t2.join();
+    t3.join();
+    t4.join();
 
     return 0;
 }
