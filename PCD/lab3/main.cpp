@@ -1,12 +1,17 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <mutex>
 #include <vector>
 
 using namespace std;
 
+// Мьютекс для синхронизации вывода
+mutex mtx;
+
 // Функция для вывода текста с задержкой в 100 мс между символами
 void printWithDelay(const string& text) {
+    lock_guard<mutex> lock(mtx);  // Захват мьютекса перед выводом
     for (char c : text) {
         cout << c;
         this_thread::sleep_for(chrono::milliseconds(100));
@@ -26,7 +31,10 @@ void thread1() {
         }
     }
     
-    cout << "Suma produselor numerelor pe pozitii impare (inceput): " << sum << endl;
+    {
+        lock_guard<mutex> lock(mtx);  // Захват мьютекса для вывода результата
+        cout << "Suma produselor numerelor pe pozitii impare (inceput): " << sum << endl;
+    }
     this_thread::sleep_for(chrono::milliseconds(1000));
     printWithDelay("Prenumele studentului");
 }
@@ -43,7 +51,10 @@ void thread2() {
         }
     }
 
-    cout << "Suma produselor numerelor pe pozitii impare (sfarsit): " << sum << endl;
+    {
+        lock_guard<mutex> lock(mtx);  // Захват мьютекса для вывода результата
+        cout << "Suma produselor numerelor pe pozitii impare (sfarsit): " << sum << endl;
+    }
     this_thread::sleep_for(chrono::milliseconds(1000));
     printWithDelay("Numele studentului");
 }
@@ -53,10 +64,13 @@ void thread3() {
     cout << "Starting Thread 3" << endl;
     printWithDelay("Conditia 3 din tabelul 3");
 
-    for (int i = 654; i <= 1278; i++) {
-        cout << i << " ";
+    {
+        lock_guard<mutex> lock(mtx);  // Захват мьютекса для вывода чисел
+        for (int i = 654; i <= 1278; i++) {
+            cout << i << " ";
+        }
+        cout << endl;
     }
-    cout << endl;
 
     this_thread::sleep_for(chrono::milliseconds(1000));
     printWithDelay("Denumirea disciplinei");
@@ -67,10 +81,13 @@ void thread4() {
     cout << "Starting Thread 4" << endl;
     printWithDelay("Conditia 4 din tabelul 3");
 
-    for (int i = 908; i >= 123; i--) {
-        cout << i << " ";
+    {
+        lock_guard<mutex> lock(mtx);  // Захват мьютекса для вывода чисел
+        for (int i = 908; i >= 123; i--) {
+            cout << i << " ";
+        }
+        cout << endl;
     }
-    cout << endl;
 
     this_thread::sleep_for(chrono::milliseconds(1000));
     printWithDelay("Grupa");
