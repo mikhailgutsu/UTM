@@ -6,12 +6,10 @@
 
 using namespace std;
 
-// Мьютекс для синхронизации вывода
 mutex mtx;
 
-// Функция для вывода текста с задержкой в 100 мс между символами
 void printWithDelay(const string& text) {
-    lock_guard<mutex> lock(mtx);  // Захват мьютекса перед выводом
+    lock_guard<mutex> lock(mtx);  
     for (char c : text) {
         cout << c;
         this_thread::sleep_for(chrono::milliseconds(100));
@@ -19,88 +17,84 @@ void printWithDelay(const string& text) {
     cout << endl;
 }
 
-// Первый поток: вычисление суммы произведений чисел на нечётных позициях по два элемента
 void thread1() {
     cout << "Starting Thread 1" << endl;
     printWithDelay("Conditia 1 din tabelul 3");
     
     int sum = 0;
-    for (int i = 19; i <= 119; i += 2) {  // Диапазон [19, 119]
+    for (int i = 19; i <= 119; i += 2) { // [19, 119]
         if (i + 1 <= 119) {
             sum += i * (i + 1);
         }
     }
     
     {
-        lock_guard<mutex> lock(mtx);  // Захват мьютекса для вывода результата
+        lock_guard<mutex> lock(mtx); 
         cout << "Suma produselor numerelor pe pozitii impare (inceput): " << sum << endl;
     }
     this_thread::sleep_for(chrono::milliseconds(1000));
-    printWithDelay("Prenumele studentului");
+    printWithDelay("Prenumele studentului - Gutu");
 }
 
-// Второй поток: вычисление суммы произведений чисел на нечётных позициях по два элемента с конца диапазона
 void thread2() {
     cout << "Starting Thread 2" << endl;
     printWithDelay("Conditia 2 din tabelul 3");
 
     int sum = 0;
-    for (int i = 106; i >= 6; i -= 2) {  // Диапазон [6, 106]
+    for (int i = 106; i >= 6; i -= 2) {  // [6, 106]
         if (i - 1 >= 6) {
             sum += i * (i - 1);
         }
     }
 
     {
-        lock_guard<mutex> lock(mtx);  // Захват мьютекса для вывода результата
+        lock_guard<mutex> lock(mtx);  
         cout << "Suma produselor numerelor pe pozitii impare (sfarsit): " << sum << endl;
     }
     this_thread::sleep_for(chrono::milliseconds(1000));
-    printWithDelay("Numele studentului");
+    printWithDelay("Numele studentului - Mihai");
 }
 
-// Третий поток: проход по диапазону от начала интервала [654, 1278]
+
 void thread3() {
     cout << "Starting Thread 3" << endl;
     printWithDelay("Conditia 3 din tabelul 3");
 
     {
-        lock_guard<mutex> lock(mtx);  // Захват мьютекса для вывода чисел
-        for (int i = 654; i <= 1278; i++) {
+        lock_guard<mutex> lock(mtx);  
+        for (int i = 654; i <= 1278; i++) { // [654, 1278]
             cout << i << " ";
         }
         cout << endl;
     }
 
     this_thread::sleep_for(chrono::milliseconds(1000));
-    printWithDelay("Denumirea disciplinei");
+    printWithDelay("Denumirea disciplinei - PCD");
 }
 
-// Четвертый поток: проход по диапазону от конца интервала [123, 908]
 void thread4() {
     cout << "Starting Thread 4" << endl;
     printWithDelay("Conditia 4 din tabelul 3");
 
     {
-        lock_guard<mutex> lock(mtx);  // Захват мьютекса для вывода чисел
-        for (int i = 908; i >= 123; i--) {
+        lock_guard<mutex> lock(mtx);  
+        for (int i = 908; i >= 123; i--) { // [123, 908]
             cout << i << " ";
         }
         cout << endl;
     }
 
     this_thread::sleep_for(chrono::milliseconds(1000));
-    printWithDelay("Grupa");
+    printWithDelay("Grupa - CR-211FR");
 }
 
 int main() {
-    // Запуск четырёх потоков
+    
     thread t1(thread1);
     thread t2(thread2);
     thread t3(thread3);
     thread t4(thread4);
 
-    // Ожидание завершения всех потоков
     t1.join();
     t2.join();
     t3.join();
